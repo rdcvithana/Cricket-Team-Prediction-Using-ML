@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cricket Player Recommender</title>
+    <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; margin: 2em; background-color: #f4f4f9; color: #333; }
+        .container { max-width: 600px; margin: auto; background: white; padding: 2em; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        h1, h2, h3 { color: #0056b3; }
+         h1 {
+        font-size: 2.5em; /* Default size for larger screens */
+        color: #0056b3; 
+    }
+    
+    h2, h3 { 
+        color: #0056b3; 
+    }
+
+    /* Media query for smaller screens */
+    @media (max-width: 680px) {
+        h1 {
+            font-size: 1.4em; /* Smaller size on screens 600px or less */
+        }
+    }
+        input[type="text"] { width: 100%; padding: 8px; margin-top: 6px; box-sizing: border-box; border: 1px solid #ccc; border-radius: 4px; }
+        button { background-color: #0056b3; color: white; padding: 10px 15px; border: none; border-radius: 4px; cursor: pointer; font-size: 16px; }
+        button:hover { background-color: #004494; }
+        .results { margin-top: 2em; border-top: 1px solid #eee; padding-top: 1em; }
+        ul { list-style-type: none; padding: 0; }
+        li { background-color: #e7f3ff; margin-bottom: 5px; padding: 10px; border-radius: 4px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Cricket Player Recommender</h1>
+        <form id="recommendation-form">
+            <div>
+                <label for="opponent">Opposition Team:</label>
+                <input type="text" id="opponent" name="opponent" required placeholder="e.g., v West Indies">
+            </div>
+            <br>
+            <div>
+                <label for="ground">Ground/Venue:</label>
+                <input type="text" id="ground" name="ground" required placeholder="e.g., Pallekele">
+            </div>
+            <br>
+            <button type="submit">Get Recommendations</button>
+        </form>
+
+        <div id="results" class="results">
+            </div>
+    </div>
+
+    <script>
+        document.getElementById('recommendation-form').addEventListener('submit', async function(event) {
+            event.preventDefault();
+
+            const opponent = document.getElementById('opponent').value;
+            const ground = document.getElementById('ground').value;
+            const resultsDiv = document.getElementById('results');
+
+            resultsDiv.innerHTML = '<p>Loading...</p>';
+
+            try {
+                const response = await fetch('/recommend', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ opponent, ground })
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                const data = await response.json();
+
+                let html = '<h2>Recommended Players</h2>';
+
+                html += '<h3>Batsmen:</h3>';
+                if (data.batsmen && data.batsmen.length > 0) {
+                    html += '<ul>';
+                    data.batsmen.forEach(player => {
+                        html += `<li>${player}</li>`;
+                    });
+                    html += '</ul>';
+                } else {
+                    html += '<p>No suitable batsmen found.</p>';
+                }
+
+                html += '<h3>Bowlers:</h3>';
+                if (data.bowlers && data.bowlers.length > 0) {
+                    html += '<ul>';
+                    data.bowlers.forEach(player => {
+                        html += `<li>${player}</li>`;
+                    });
+                    html += '</ul>';
+                } else {
+                    html += '<p>No suitable bowlers found.</p>';
+                }
+
+                resultsDiv.innerHTML = html;
+
+            } catch (error) {
+                resultsDiv.innerHTML = `<p>An error occurred: ${error.message}. Please check the console for more details.</p>`;
+                console.error('Fetch error:', error);
+            }
+        });
+    </script>
+</body>
+</html>
