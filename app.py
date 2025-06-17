@@ -18,7 +18,7 @@ column_mapping = {
 data.rename(columns=column_mapping, inplace=True)
 data.columns = data.columns.str.strip()
 
-# Function to recommend players (refactored from your notebook)
+# Function to recommend players
 def recommend_players(selected_opponent, selected_ground):
     # --- Batsman Recommendation Logic ---
     batsman_data = data.copy()
